@@ -4,7 +4,7 @@
 A multi-tenant platform for secure data ingestion and processing with full auditability. Member organizations upload sensitive data packages which are validated, processed by containerized workloads, and tracked through a complete audit trail.
 
 ## Architecture
-![Hybrid Backbone Architecture](docs/Architecture Diagram.png)
+![Hybrid Backbone Architecture](docs/architecture.png)
 
 This diagram shows the event-driven workflow:
 S3 → Lambda → ECS (Fargate) → DynamoDB audit trail.
