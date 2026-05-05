@@ -26,6 +26,7 @@ Here’s what happens when a file is uploaded:
   - VALIDATION_PASSED / FAILED
   - PROCESSING_STARTED
   - PROCESSING_COMPLETED / FAILED
+ This ensures every file can be tracked end-to-end for debugging and compliance.
 
 For detailed deployment and testing steps, refer to the [Runbook](RUNBOOK.md).
 
