@@ -1,7 +1,7 @@
 # Hybrid Backbone - Secure Data Orchestration Platform
 
 ## Overview
-A multi-tenant platform for secure data ingestion and processing with full auditability. Member organizations upload sensitive data packages which are validated, processed by containerized workloads, and tracked through a complete audit trail.
+This project builds a secure pipeline to ingest and process files, while keeping track of every step for auditing.
 
 ## Architecture
 ![Hybrid Backbone Architecture](docs/architecture.png)
@@ -10,7 +10,7 @@ This diagram shows the event-driven workflow:
 S3 → Lambda → ECS (Fargate) → DynamoDB audit trail.
 
 ## End-to-End Flow 
-The system performs the following steps when a file is uploaded:
+Here’s what happens when a file is uploaded:
 
 - File is uploaded to S3 ingress bucket with `organization-id` tag
 - Lambda function is triggered automatically
@@ -27,13 +27,13 @@ The system performs the following steps when a file is uploaded:
   - PROCESSING_STARTED
   - PROCESSING_COMPLETED / FAILED
 
-For detailed execution steps, refer to [RUNBOOK.md]
+For detailed deployment and testing steps, refer to the [Runbook](RUNBOOK.md).
 
-- **Storage**: S3 bucket with KMS encryption, versioning, and strict bucket policies
-- **Trigger**: Lambda function on S3 events with validation logic
-- **Compute**: ECS Fargate tasks for isolated containerized processing
-- **Audit**: DynamoDB with global secondary indexes for queryable event history
-- **Security**: Least-privilege IAM roles, VPC endpoints, encryption at rest, TLS enforcement
+The system uses:
+- S3 for storage (encrypted and private)
+- Lambda to validate uploads and trigger processing
+- ECS Fargate to run the processing container
+- DynamoDB to store audit logs
 
 ## Prerequisites
 - Terraform >= 1.0
