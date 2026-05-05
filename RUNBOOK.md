@@ -153,6 +153,20 @@ aws dynamodb scan \
 
 ---
 
+## 7. Expected Output
+
+After uploading test data, the end-to-end workflow should execute successfully. ECS task logs in CloudWatch should display processing status:
+
+![ECS Task Logs - Expected Output](docs/expected-output.png)
+
+The logs show:
+- ✅ File download from S3 ingress bucket
+- ✅ Organization metadata extraction
+- ✅ File processing completion
+- ✅ Audit trail entries written to DynamoDB
+
+---
+
 ## Notes
 
 - **Region**: All commands use `eu-central-1`. Update as needed.
