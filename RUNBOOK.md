@@ -1,5 +1,13 @@
 # Hybrid Backbone Runbook
 
+## Prerequisites
+- AWS account
+- AWS CLI configured
+- Terraform installed
+- Docker Desktop installed
+- IAM permissions to create S3, Lambda, ECS, ECR, DynamoDB, IAM, KMS, and VPC resources
+
+
 Complete deployment and operational guide for the Hybrid Backbone infrastructure.
 
 ---
@@ -11,6 +19,7 @@ Initialize and deploy the Terraform infrastructure.
 ```bash
 cd infra
 terraform init
+terraform validate 
 terraform plan
 terraform apply
 ```
@@ -164,6 +173,13 @@ The logs show:
 - ✅ Organization metadata extraction
 - ✅ File processing completion
 - ✅ Audit trail entries written to DynamoDB
+
+## 8. Clean Up 
+To avoid AWS charges, destroy all Terraform-managed resources:
+```bash
+cd infra
+terraform destroy
+
 
 ---
 
