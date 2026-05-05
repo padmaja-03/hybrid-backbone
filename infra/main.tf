@@ -1,16 +1,14 @@
-# infra/main.tf - Core Terraform configuration for Hybrid Backbone
+# infra/main.tf - Core Terraform configuration for Hybrid Backbone (CORRECTED)
 
 terraform {
   required_version = ">= 1.0"
-
   backend "s3" {
     bucket         = "hybrid-backbone"
-    key            = "terraform.tfstate"
+    key            = "env/dev/terraform.tfstate"
     region         = "eu-central-1"
-    dynamodb_table = "terraform-lock-table"
+    use_lockfile   = true
     encrypt        = true
   }
-
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -136,18 +134,6 @@ resource "aws_s3_bucket_policy" "ingress" {
         Condition = {
           Bool = {
             "aws:SecureTransport" = "false"
-          }
-        }
-      },
-      {
-        Sid       = "DenyPublicRead"
-        Effect    = "Deny"
-        Principal = "*"
-        Action    = "s3:GetObject"
-        Resource  = "${aws_s3_bucket.ingress.arn}/*"
-        Condition = {
-          StringNotEquals = {
-            "s3:x-amz-acl" = ["private", "bucket-owner-full-control"]
           }
         }
       }
@@ -379,7 +365,8 @@ resource "aws_iam_role_policy" "ecs_task" {
 resource "aws_cloudwatch_log_group" "processor" {
   name              = "/ecs/${local.name_prefix}-processor"
   retention_in_days = var.environment == "prod" ? 30 : 7
-  kms_key_id        = aws_kms_key.backbone.arn
+  # KMS encryption only in prod to avoid key policy complexity in dev
+  kms_key_id        = var.environment == "prod" ? aws_kms_key.backbone.arn : null
   
   tags = local.common_tags
 }
@@ -540,6 +527,12 @@ resource "aws_lambda_function" "trigger" {
   timeout          = 60
   memory_size      = 256
   
+  # VPC configuration for Lambda (optional, removed for simplicity in dev)
+  # vpc_config {
+  #   subnet_ids         = aws_subnet.private[*].id
+  #   security_group_ids = [aws_security_group.lambda.id]
+  # }
+  
   environment {
     variables = {
       AUDIT_TABLE_NAME    = aws_dynamodb_table.audit.name
@@ -547,7 +540,6 @@ resource "aws_lambda_function" "trigger" {
       ECS_TASK_DEFINITION = aws_ecs_task_definition.processor.family
       ECS_SUBNETS         = join(",", aws_subnet.private[*].id)
       ECS_SECURITY_GROUP  = aws_security_group.ecs_tasks.id
-      AWS_REGION          = var.aws_region
       KMS_KEY_ID          = aws_kms_key.backbone.key_id
     }
   }
@@ -688,16 +680,6 @@ resource "aws_security_group" "lambda" {
   }
   
   tags = merge(local.common_tags, { Name = "${local.name_prefix}-lambda-sg" })
-}
-
-# Lambda VPC config (for potential VPC endpoints, not strictly required but for completeness)
-resource "aws_lambda_function" "trigger_vpc" {
-  # ... (attached to existing Lambda) 
-  vpc_config {
-    subnet_ids         = aws_subnet.private[*].id
-    security_group_ids = [aws_security_group.lambda.id]
-  }
-  # Note: This modifies the earlier lambda - in practice would combine but for clarity
 }
 
 # VPC Endpoints for private access (security enhancement)
